@@ -39,41 +39,63 @@ ExploitLib = function(lib, memAddr, value, extra)
     end if
 end function
 
+FileFlow = function(flow)
+    if flow.is_folder() then
+        folders = flow.get_folders()
+        files = flow.get_files()
+        
+        for folder in folders
+            if folder.has_permission("w") and folder.has_permission("r") then
+                print("-> found folder (r+w): " + folder.name)
+            else if folder.has_permission("w") then
+                print("-> found folder (w): " + folder.name)
+            else if folder.has_permission("r") then
+                print("-> found folder (r): " + folder.name)
+            end if
+        end for
+
+        for file in files
+            if file.has_permission("w") and file.has_permission("r") then
+                print("-> found file (r+w): " + file.name)
+            else if file.has_permission("w") then
+                print("-> found file (w): " + file.name)
+            else if file.has_permission("r") then
+                print("-> found file (r): " + file.name)
+            end if
+        end for
+    else
+        print("-> file content: " + flow.get_content())
+    end if
+end function
+
+ComputerFlow = function(flow)
+    print("-> local IP: " + flow.local_ip())
+
+    passwd = flow.File("/etc/passwd")
+    if passwd == null then
+        print("-> can't find /etc/passwd")
+    else if passwd.has_permission("w") then
+        print("-> trying to spoof root...")
+        spoof = passwd.set_content("root:c9754c092960be7192c36aefc44c37da")
+        if spoof == 1 then
+            print("-> changed root password: Utange")
+        else
+            print("-> error: " + spoof)
+        end if
+    else if passwd.has_permission("r") then
+        print("-> read passwd\n" + passwd.get_content())
+    else
+        print("-> can't read or write /etc/passwd")
+    end if
+end function
+
 CorrectFlow = function(flow)
     if typeof(flow) == "string" then
         print("-> exploit failed: " + flow)
     else if typeof(flow) == "file" then
-        if flow.is_folder() then
-            folders = flow.get_folders()
-            files = flow.get_files()
-            for folder in folders
-                print("-> found folder: " + folder.name)
-            end for
-            for file in files
-                print("-> found file: " + file.name)
-            end for
-        else
-            print("-> file content: " + flow.get_content())
-        end if
+        FileFlow(flow)
     else if typeof(flow) == "computer" then
-        print("-> local IP: " + flow.local_ip())
-
-        passwd = flow.File("/etc/passwd")
-        if passwd == null then
-            print("-> can't find /etc/passwd")
-        else if passwd.has_permission("w") then
-            print("-> trying to spoof root...")
-            spoof = passwd.set_content("root:c9754c092960be7192c36aefc44c37da")
-            if spoof == 1 then
-                print("-> changed root password: Utange")
-            else
-                print("-> error: " + spoof)
-            end if
-        else if passwd.has_permission("r") then
-            print("-> read passwd\n" + passwd.get_content())
-        else
-            print("-> can't read or write /etc/passwd")
-        end if
+        ComputerFlow(flow)
     else if typeof(flow) == "shell" then
         flow.start_terminal()
     else
@@ -82,7 +104,6 @@ CorrectFlow = function(flow)
 end function
 
 mode = params[0]
-
 if mode == "router" then
     // router [IP] [MemAddr] [Value] (Extra)
     // params: 0=mode, 1=IP, 2=MemAddr, 3=Value, 4=Extra(optional)
