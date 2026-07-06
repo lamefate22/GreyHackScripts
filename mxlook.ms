@@ -1,0 +1,54 @@
+meta = include_lib("/lib/metaxploit.so")
+
+if meta == null then
+    exit("Error: Missing metaxploit library.")
+end if
+
+if params.len < 1 then
+    usage = [
+        "Usage:",
+        "  mxlook router [IP] - lookup router lib",
+        "  mxlook remote [IP] [Port] - lookup remote lib",
+    ].join("\n")
+
+    exit(usage)
+end if
+
+GetSession = function(ip, port)
+    if port == null then
+        return meta.net_use(ip)
+    else
+        return meta.net_use(ip, port.val)
+    end if
+end function
+
+RemoteLookup = function(session)
+    conn_gateway = session.get_num_conn_gateway()
+    portforward = session.get_num_portforward()
+    reg_users = session.get_num_users()
+    
+    is_root_active_user = session.is_root_active_user()
+    is_any_active_user = session.is_any_active_user()
+
+    print("-> number of devices using it as gateway: " + conn_gateway)
+    print("-> portforward configured: " + portforward)
+    print("-> total users registered: " + reg_users)
+
+    print("-> is root user active: " + is_root_active_user)
+    print("-> is any user active: " + is_any_active_user)
+end function
+
+mode = params[0]
+if mode == "router" then
+    // router [IP]
+    // params: 0=mode, 1=IP
+    session = GetSession(params[1], null)
+    RemoteLookup(session)
+else if mode == "remote" then
+    // router [IP] [Port]
+    // params: 0=mode, 1=IP, 2=Port
+    session = GetSession(params[1], params[2])
+    RemoteLookup(session)
+else
+    exit(usage)
+end if
