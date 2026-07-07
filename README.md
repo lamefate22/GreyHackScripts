@@ -48,6 +48,7 @@ chmod g+rwx /lib
 
 chmod -R u+rwx /home
 chown -R {user} /home/{user}
+chgrp -R {user} /home/{user}
 ```
 
 ### How to use
