@@ -11,7 +11,7 @@ Basic configuration, applicable in both cases:
 ```bash
 chmod -R o-rwx /
 chmod -R g-rwx /
-chown -R root:root /
+chown -R root /
 chgrp -R root /
 ```
 
@@ -47,7 +47,7 @@ chmod o+rx /sys
 chmod g+rwx /lib
 
 chmod -R u+rwx /home
-chown -R {user}:{group} /home/{user}
+chown -R {user} /home/{user}
 ```
 
 ### How to use
