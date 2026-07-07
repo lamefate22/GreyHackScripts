@@ -1,0 +1,94 @@
+meta = include_lib("/lib/metaxploit.so")
+
+if not meta then
+    meta = include_lib("metaxploit.so")
+    if not meta then
+        exit("Error: Missing metaxploit library.")
+    end if
+end if
+
+if params.len < 2 then
+    usage = [
+        "Usage:",
+        "  mxscan router [IP] - scan router library",
+        "  mxscan remote [IP] [Port] - scan remote library",
+    ].join("\n")
+
+    exit(usage)
+end if
+
+GetSession = function(ip, port)
+    if port == null then
+        return meta.net_use(ip)
+    else
+        return meta.net_use(ip, port.val)
+    end if
+end function
+
+DumpLib = function(session)
+    if session == null then
+        exit("Error: metaxploit returned null NetSession.")
+    end if
+
+    lib = session.dump_lib()
+    return lib
+end function
+
+ScanLib = function(lib)
+    vulns = meta.scan(lib)
+
+    if vulns == null then
+        exit("Error: unable to scan library.")
+    end if
+
+    return vulns
+end function
+
+ScanAddresses = function(lib, addresses)
+    for addr in addresses
+        print("-> scan " + addr)
+        vuln = meta.scan_address(lib, addr)
+
+        if vuln != null then
+            lines = vuln.split("\n")
+            cleaned = []
+
+            for line in lines
+                trimmedLine = line.trim
+                if trimmedLine == "" then continue
+                if trimmedLine.indexOf("decompiling source") != null then continue
+                if trimmedLine.indexOf("searching unsecure values") != null then continue
+                cleaned.push(trimmedLine)
+            end for
+
+            print(cleaned.join("\n\n"))
+        end if
+    end for
+end function
+
+mode = params[0]
+if mode == "router" then
+    // router [IP]
+    // params: 0=mode, 1=IP
+    session = GetSession(params[1], null)
+    lib = DumpLib(session)
+    print("-> " + lib.lib_name + "=v" + lib.version)
+
+    addresses = ScanLib(lib)
+    print("-> " + addresses.len + " vulnerable memory addresses on remote library")
+
+    ScanAddresses(lib, addresses)
+else if mode == "remote" then
+    // remote [IP] [Port]
+    // params: 0=mode, 1=IP, 2=Port
+    session = GetSession(params[1], params[2])
+    lib = DumpLib(session)
+    print("-> " + lib.lib_name + "=v" + lib.version)
+
+    addresses = ScanLib(lib)
+    print("-> " + addresses.len + " vulnerable memory addresses on remote library")
+
+    ScanAddresses(lib, addresses)
+else
+    exit(usage)
+end if
