@@ -1,0 +1,53 @@
+FNV_OFFSET = 2166136261
+FNV_PRIME = 16777619
+MOD_32 = 4294967296
+
+Encode = function(password)
+    GetTime = function()
+        date = current_date()
+        dateSegments = date.split(" - ")
+        timeParts = dateSegments[1].split(":")
+
+        return timeParts
+    end function
+
+    HashString = function(input)
+        acc = FNV_OFFSET
+
+        for i in range(0, input.len - 1)
+            charCode = code(input[i])
+            acc = bitXor(acc, charCode)
+            if acc < 0 then acc = acc + MOD_32
+            acc = (acc * FNV_PRIME) % MOD_32
+            if acc < 0 then acc = acc + MOD_32
+        end for
+
+        return acc
+    end function
+
+    ConvertToHex = function(num)
+        hexChars = "0123456789abcdef"
+
+        if num == 0 then
+            return "0"
+        end if
+
+        result = ""
+        while num > 0
+            digit = num % 16
+            result = hexChars[digit] + result
+            num = floor(num / 16)
+        end while
+
+        return result
+    end function
+
+    datetime = GetTime()
+
+    hours = datetime[0]
+    minutes = datetime[1]
+    combined = hours + ":" + minutes + ":" + password
+    hashValue = HashString(combined)
+
+    return ConvertToHex(hashValue)
+end function
