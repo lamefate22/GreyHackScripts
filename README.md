@@ -20,13 +20,13 @@ chgrp -R root /
 This option involves completely blocking access via a guest account or a non-root user.
 
 ```bash
-chmod g+rx /etc
-chmod g+rx /var
-chmod g+rx /bin
-chmod g+rx /usr
-chmod g+rx /boot
-chmod g+rx /sys
-chmod g+rwx /lib
+chmod -R g+rx /etc
+chmod -R g+rx /var
+chmod -R g+rx /boot
+chmod -R g+rx /sys
+chmod -R g+rwx /lib
+chmod -R g+rwx /bin
+chmod -R g+rwx /usr
 
 rm -r /home/guest
 ```
@@ -36,15 +36,16 @@ rm -r /home/guest
 This option assumes access via the `root` account and your game account, which is a member of the `root` group.
 
 ```bash
-chmod g+rx /etc
-chmod g+rx /var
-chmod g+rx /bin
-chmod g+rx /usr
-chmod g+rx /boot
-chmod g+rx /home
-chmod g+rx /sys
-chmod o+rx /sys
-chmod g+rwx /lib
+chmod g+rwx /
+chmod -R g+rx /etc
+chmod -R g+rx /var
+chmod -R g+rx /boot
+chmod -R g+rx /home
+chmod -R g+rx /sys
+chmod -R o+rx /sys
+chmod -R g+rwx /lib
+chmod -R g+rwx /bin
+chmod -R g+rwx /usr
 
 chmod -R u+rwx /home
 chown -R {user} /home/{user}
