@@ -7,13 +7,13 @@ if not meta then
     end if
 end if
 
-if params.len < 4 then
-    usage = [
-        "Usage:",
-        "  mxploit router [IP] [MemAddr] [Value] (Extra) - exploit router lib",
-        "  mxploit remote [IP] [Port] [MemAddr] [Value] (Extra) - exploit remote lib",
-    ].join("\n")
+usage = [
+    "Usage:",
+    "  mxploit router [IP] [MemAddr] [Value] (Extra) - exploit router lib",
+    "  mxploit remote [IP] [Port] [MemAddr] [Value] (Extra) - exploit remote lib",
+].join("\n")
 
+if params.len < 4 then
     exit(usage)
 end if
 

@@ -7,13 +7,13 @@ if not meta then
     end if
 end if
 
-if params.len < 2 then
-    usage = [
-        "Usage:",
-        "  mxscan router [IP] - scan router library",
-        "  mxscan remote [IP] [Port] - scan remote library",
-    ].join("\n")
+usage = [
+    "Usage:",
+    "  mxscan router [IP] - scan router library",
+    "  mxscan remote [IP] [Port] - scan remote library",
+].join("\n")
 
+if params.len < 2 then
     exit(usage)
 end if
 

@@ -7,13 +7,13 @@ if not meta then
     end if
 end if
 
-if params.len < 1 then
-    usage = [
-        "Usage:",
-        "  mxlook router [IP] - lookup router lib",
-        "  mxlook remote [IP] [Port] - lookup remote lib",
-    ].join("\n")
+usage = [
+    "Usage:",
+    "  mxlook router [IP] - lookup router lib",
+    "  mxlook remote [IP] [Port] - lookup remote lib",
+].join("\n")
 
+if params.len < 1 then
     exit(usage)
 end if
 
