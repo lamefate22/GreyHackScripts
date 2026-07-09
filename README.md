@@ -2,6 +2,9 @@
 
 A collection of useful custom scripts for the game GreyHack.
 
+### TODO
+- Fix areas parsing (lines 200-263)
+
 ### Multiplayer Security Tips
 
 This section contains my personal security recommendations. They may not necessarily be the best approach. All the steps below are performed as `root`.
