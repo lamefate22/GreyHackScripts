@@ -56,13 +56,13 @@ DecipherFile = function(file)
 end function
 
 
-if params.len < 2 then
-    usage = [
-        "Usage:",
-        "  qdecipher string [encryptedString] - decipher string containing password",
-        "  qdecipher file [encryptedFile] - decipher all file containing login:password lines",
-    ].join("\n")
+usage = [
+    "Usage:",
+    "  qdecipher string [encryptedString] - decipher string containing password",
+    "  qdecipher file [encryptedFile] - decipher all file containing login:password lines",
+].join("\n")
 
+if params.len < 2 then
     exit(usage)
 end if
 
@@ -85,4 +85,6 @@ else if mode == "file" then
         print("<color=#5C6B73>----- Decrypted Result -----</color>")
         print(decryptedFile)
     end if
+else
+    exit(usage)
 end if
