@@ -1,0 +1,263 @@
+GetLib = function(lib) // Imports a library with the required name (two methods)
+    lib = include_lib("/lib/" + lib)
+
+    if not lib then    
+        lib = include_lib(lib)
+        if not lib then
+            exit("Error: Missing " + lib + " library.")
+        else
+            return lib
+        end if
+    else
+        return lib
+    end if
+end function
+
+meta = GetLib("metaxploit.so")
+
+GetNetSession = function(ip, port) // Returns the netSession of the remote library
+    if port == null then
+        return meta.net_use(ip)
+    else
+        return meta.net_use(ip, port.val)
+    end if
+end function
+
+DumpNetLib = function(netSession) // Returns the metaLib from the received netSession
+    if netSession == null then
+        exit("Error: metaxploit returned null netSession.")
+    end if
+
+    lib = netSession.dump_lib()
+    return lib
+end function
+
+ScanMetaLib = function(metaLib, information) // Returns the vulnerabilities found in the received metaLib object
+    memoryAreas = meta.scan(metaLib)
+
+    if memoryAreas == null then
+        exit("Error: unable to scan library.")
+    end if
+
+    exploits = {}
+    for area in memoryAreas
+        print("-> scan " + area)
+        vuln = meta.scan_address(metaLib, area)
+
+        if vuln != null then
+            segments = vuln.split("Unsafe check: ")[1:]
+            if information != null then
+                for segment in segments
+                    portforward = information[0]
+                    registered_users = information[1]
+                    root_users_active = information[2]
+                    any_users_active = information[3]
+
+                    if segment.indexOf("* Checking root active user.") != null then
+                        if root_users_active == 0 then continue
+                    else if segment.indexOf("* Checking an active user.") != null or segment.indexOf("* Checking guest active user.") != null then
+                        if any_users_active < 1 then continue
+                    else if segment.indexOf("* Checking registered users equal to") != null then
+                        lineSplit = segment.split("\n")
+                        
+                        is_failed = null
+                        for line in lineSplit                            
+                            if line.indexOf("* Checking registered users equal to") then
+                                num = line[-2:][0]
+
+                                if num[0].val < any_users_active then is_failed = true
+                            end if
+                        end for
+
+                        if is_failed then continue
+                    else if segment.indexOf("port forwarding configured from router to the target computer.") != null then
+                        lineSplit = segment.split("\n")
+
+                        is_failed = null
+                        for line in lineSplit
+                            if line.indexOf("port forwarding configured from router to the target computer.") != null then
+                                ports = line[2:][0]
+
+                                if ports < portforward then is_failed = true
+                            end if
+                        end for
+
+                        if is_failed then continue
+                    end if
+
+                    labelStart = segment.indexOf("<b>")
+                    labelEnd = segment.indexOf("</b>")
+                    
+                    if exploits.hasIndex(area) then
+                        exploits[area].push(segment[labelStart + 3: labelEnd])
+                    else
+                        exploits[area] = [segment[labelStart + 3: labelEnd]]
+                    end if
+                end for
+            else
+                for segment in segments
+                    labelStart = segment.indexOf("<b>")
+                    labelEnd = segment.indexOf("</b>")
+                    
+                    if exploits.hasIndex(area) then
+                        exploits[area].push(segment[labelStart + 3: labelEnd])
+                    else
+                        exploits[area] = [segment[labelStart + 3: labelEnd]]
+                    end if
+                end for
+            end if
+
+            return exploits
+        end if
+    end for
+end function
+
+LookupNetSession = function(netSession)
+    portforward = netSession.get_num_portforward()
+    registered_users = netSession.get_num_users()
+
+    root_users_active = netSession.is_root_active_user()
+    any_users_active = netSession.is_any_active_user()
+
+    return [portforward, registered_users, root_users_active, any_users_active]
+end function
+
+ExploitMetaLib = function(metaLib, area, segment) // Returns the flow after exploiting the vulnerability
+    return metaLib.overflow(area, segment, "qwerty")
+end function
+
+UseCorrectFlow = function(flow) // Determines the flow type and uses it
+    if typeof(flow) == "string" then // Error string
+        if flow.indexOf("Starting attack... failed!") then
+            print("-> exploit conditions have not been met")
+        else
+            print("-> error: " + flow)
+        end if
+    else if typeof(flow) == "number" then // True/False code
+        if flow == 1 then
+            print("-> the exploit was successful")
+        else if flow == 0 then
+            print("-> the exploit failed")
+        end if
+    else if typeof(flow) == "file" then // File object
+        if flow.is_folder() then
+            subfolders = flow.get_folders()
+            files = flow.get_files()
+
+            for sub in subfolders
+                print("<color=#8fbcbb>" + sub.permissions() + " " + sub.name() + "</color>")
+            end for
+
+            for file in files
+                if file.is_binary then
+                    print("<color=#98c379>" + file.permissions() + " " + file.name() + "</color>")
+                else
+                    print("<color=#abb2bf>" + file.permissions() + " " + file.name() + "</color>")
+                end if
+            end for
+        else if not flow.is_binary() then
+            if flow.has_permission("r") then
+                print("-> " + flow.path() + " content: " + flow.get_content())
+            end if
+        end if
+    else if typeof(flow) == "computer" then // Computer object
+        print("-> Lan IP: " + flow.local_ip())
+
+        passwd = flow.File("/etc/passwd")
+        if passwd == null then
+            print("-> can't find /etc/passwd")
+        else if passwd.has_permission("r") then
+            print("-> read /etc/passwd\n" + passwd.get_content())
+        else if passwd.has_permission("w") then
+            print("-> trying to spoof root...")
+
+            password = user_input("-> enter new root password: ")
+            spoof = passwd.set_content("root:" + md5(password))
+            if typeof(spoof) == "number" then
+                print("-> changed root password: " + password)
+            else
+                print("-> spoof error: " + spoof)
+            end if
+        end if
+    else if typeof(flow) == "shell" then
+        flow.start_terminal()
+    end if
+end function
+
+
+usage = [
+    "Usage:",
+    "  mxkit router [IP] - automatically hack a router library",
+    "  mxkit remote [IP] [Port] - automatically hack a remote library",
+    "  mxkit local [libraryPath] - automatically hack the local library",
+].join("\n")
+
+if params.len < 2 then
+    exit(usage)
+end if
+
+mode = params[0]
+if mode == "router" then
+    // router [IP]
+    // params: 0=mode, 1=IP
+    netSession = GetNetSession(params[1], null)
+    information = LookupNetSession(netSession)
+    metaLib = DumpNetLib(netSession)
+    print("-> " + metaLib.lib_name + "=v" + metaLib.version)
+
+    exploits = ScanMetaLib(metaLib, information)
+    print("-> " + exploits.indexes().len() + " vulnerable memory areas were found")
+
+    for area in exploits.indexes()
+        for segment in exploits[area].values()
+            print("-> exploiting " + segment + " with area " + area)
+
+            flow = ExploitMetaLib(metaLib, area, segment)
+            print("-> returned flow type: " + typeof(flow))
+
+            UseCorrectFlow(flow)
+        end for
+    end for
+else if mode == "remote" then
+    // remote [IP] [Port]
+    // params: 0=mode, 1=IP, 2=Port
+    netSession = GetNetSession(params[1], params[2])
+    information = LookupNetSession(netSession)
+    metaLib = DumpNetLib(netSession)
+    print("-> " + metaLib.lib_name + "=v" + metaLib.version)
+
+    exploits = ScanMetaLib(metaLib, information)
+    print("-> " + exploits.indexes() + " vulnerable memory areas were found")
+
+    for area in exploits.indexes()
+        for segment in exploits[area].values()
+            print("-> exploiting " + segment + " with area " + area)
+
+            flow = ExploitMetaLib(metaLib, area, segment)
+            print("-> returned flow type: " + typeof(flow))
+
+            UseCorrectFlow(flow)
+        end for
+    end for
+else if mode == "local" then
+    // local [libraryPath]
+    // params: 0=mode, 1=libraryPath
+    metaLib = meta.load(params[1])
+    print("-> " + metaLib.lib_name + "=v" + metaLib.version)
+
+    exploits = ScanMetaLib(metaLib, null)
+    print("-> " + exploits.indexes().len() + " vulnerable memory areas were found")
+
+    for area in exploits.indexes
+        for segment in exploits[area].values()
+            print("-> exploiting " + segment + " with area " + area)
+
+            flow = ExploitMetaLib(metaLib, area, segment)
+            print("-> returned flow type: " + typeof(flow))
+
+            UseCorrectFlow(flow)
+        end for
+    end for
+else
+    exit(usage)
+end if
