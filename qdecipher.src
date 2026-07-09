@@ -1,25 +1,86 @@
-crypto = include_lib("/lib/crypto.so")
+GetLib = function(lib)
+    lib = include_lib("/lib/" + lib)
 
-if not crypto then    
-    crypto = include_lib("crypto.so")
-    if not crypto then
-        exit("Error: Missing crypto library.")
+    if not lib then    
+        lib = include_lib(lib)
+        if not lib then
+            exit("Error: Missing " + lib + " library.")
+        else
+            return lib
+        end if
+    else
+        return lib
     end if
-end if
+end function
 
 GetPassword = function(encryptedPassword)
     decryptedPassword = crypto.decipher(encryptedPassword)
     return decryptedPassword
 end function
 
-if params.len < 1 then
+ValidateFile = function(file)
+    if not file then exit("Error: File not found.")
+    if file.is_binary then exit("Error: Can't read. Binary file")
+    if file.get_content.len == 0 then exit("Error: No users found.")
+    if not file.has_permission("r") then exit("Error: Can't read file. Permission denied.")
+end function
+
+DecipherFile = function(file)
+    content = file.get_content()
+    lines = content.split("\n")
+    result = []
+
+    print("-> total of " + lines.len + " lines")
+    for i in range(0, lines.len - 1)
+        line = lines[i]
+
+        if line.len > 0 then
+            encryptedString = line.split(":")
+            login = encryptedString[0]
+            pass = encryptedString[1]
+
+            print("-> " + login)
+            decryptedPassword = GetPassword(pass)
+            if decryptedPassword == null then
+                print("-> error: unable to decipher string " + str(i + 1))
+                result.push(line)
+            else
+                result.push(login + ":" + decryptedPassword)
+            end if
+        end if
+    end for
+
+    return result.join("\n")
+end function
+
+
+if params.len < 2 then
     usage = [
         "Usage:",
-        "  qdecipher [encryptedPassword] - quick password decipher",
+        "  qdecipher string [encryptedString] - decipher string containing password",
+        "  qdecipher file [encryptedFile] - decipher all file containing login:password lines",
     ].join("\n")
 
     exit(usage)
 end if
 
-password = GetPassword(params[0])
-print("-> password: " + password)
+mode = params[0]
+if mode == "string" then
+    // string [encryptedString]
+    // params: 0=mode, 1=encryptedString
+    password = GetPassword(params[1])
+    print(password)
+else if mode == "file" then
+    // file [encryptedFile]
+    // params: 0=mode, 1=encryptedFile
+    file = get_shell.host_computer.File(get_abs_path(params[1]))
+    
+    ValidateFile(file)
+    decryptedFile = DecipherFile(file)
+
+    if decryptedFile != null then
+        clear_screen()
+        print("<color=#5C6B73>----- Decrypted Result -----</color>")
+        print(decryptedFile)
+    end if
+end if
