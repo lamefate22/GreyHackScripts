@@ -1,4 +1,4 @@
-GetLib = function(lib)
+GetLib = function(lib) // Imports a library with the required name in two ways
     lib = include_lib("/lib/" + lib)
 
     if not lib then    
@@ -15,19 +15,19 @@ end function
 
 crypto = GetLib("crypto.so")
 
-GetPassword = function(encryptedPassword)
-    decryptedPassword = crypto.decipher(encryptedPassword)
-    return decryptedPassword
-end function
-
-ValidateFile = function(file)
+ValidateFile = function(file) // Checks the file object for errors
     if not file then exit("Error: File not found.")
     if file.is_binary then exit("Error: Can't read. Binary file")
     if file.get_content.len == 0 then exit("Error: No users found.")
     if not file.has_permission("r") then exit("Error: Can't read file. Permission denied.")
 end function
 
-DecipherFile = function(file)
+DecipherPassword = function(encryptedPassword) // Deciphers the password
+    decryptedPassword = crypto.decipher(encryptedPassword)
+    return decryptedPassword
+end function
+
+DecipherFile = function(file) // Deciphers a file containing encrypted passwords line by line
     content = file.get_content()
     lines = content.split("\n")
     result = []
@@ -42,7 +42,7 @@ DecipherFile = function(file)
             pass = encryptedString[1]
 
             print("-> " + login)
-            decryptedPassword = GetPassword(pass)
+            decryptedPassword = DecipherPassword(pass)
             if decryptedPassword == null then
                 print("-> error: unable to decipher string " + str(i + 1))
                 result.push(line)
@@ -70,7 +70,7 @@ mode = params[0]
 if mode == "string" then
     // string [encryptedString]
     // params: 0=mode, 1=encryptedString
-    password = GetPassword(params[1])
+    password = DecipherPassword(params[1])
     print(password)
 else if mode == "file" then
     // file [encryptedFile]
