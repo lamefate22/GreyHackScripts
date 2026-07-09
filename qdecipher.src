@@ -13,6 +13,8 @@ GetLib = function(lib)
     end if
 end function
 
+crypto = GetLib("crypto.so")
+
 GetPassword = function(encryptedPassword)
     decryptedPassword = crypto.decipher(encryptedPassword)
     return decryptedPassword
