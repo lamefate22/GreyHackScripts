@@ -1,0 +1,21 @@
+ImportLibrary = function(currentPath, libraryName) // Импортирует необходимую библиотеку из трех разных мест
+    library = include_lib("/lib/" + libraryName) // Пробуем импортировать из /lib
+
+    if library then
+        return library
+    else
+        library = include_lib(currentPath + "/" + libraryName) // Пробуем импортировать из текущей папки
+        
+        if library then
+            return library
+        else
+            library = include_lib(currentPath + "/Utils/" + libraryName) // Пробуем импортировать из ~/Utils
+
+            if library then
+                return library
+            else
+                exit("<color=#e8594f>Unable to import " + libraryName + " library. Not found in: ~/, /lib, ~/Utils.</color>")
+            end if
+        end if
+    end if
+end function
