@@ -44,28 +44,7 @@ Decode = function(receivedHash)
         return result
     end function
 
-    GetRealPassword = function()
-        computer = get_shell.host_computer // NOTE: Runtime Error: get_shell: unable to use this method in encryption configuration [/ line 48]
-        passwd = computer.File("/etc/passwd")
-
-        if passwd == null then return null
-
-        content = passwd.get_content()
-        lines = content.split("\n")
-
-        for line in lines
-            parts = line.split(":")
-            if parts.len >= 2 and parts[0] == "root" then
-                return crypto.decipher(parts[1])
-            end if
-        end for
-
-        return null
-    end function
-
-    realPassword = GetRealPassword()
-
-    if realPassword == null then return ""
+    realPassword = null
 
     datetime = GetTime()
     hours = datetime[0]

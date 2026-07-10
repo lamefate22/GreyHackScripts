@@ -1,0 +1,106 @@
+INFO = "#424141"
+ERROR = "#e8594f"
+SUCCESS = "#7ef069"
+WARNING = "#8c8f2e"
+GENERAL = "#663a5c"
+
+
+// === Функции, служающие вспомогательными инструментами ===
+
+
+ColorText = function(text, color) // Позволяет легче окрашивать текст в разные цвета
+    return "<color=" + color + ">" + text + "</color>"
+end function
+
+
+// === Функции для автоматической установки ===
+
+
+InstallEncode = function(codePath) // Установщик для encode.src
+    files = codePath.get_files()
+
+    if files.indexOf("encode.src") != null then
+        encode = get_shell.host_computer.File(codePath.path() + "/encode.src")
+        result = encode.copy("/server", "encode.src")
+
+        if result == 1 then
+            print(ColorText("[SUCCESS] Copied encode.src to /server", SUCCESS))
+        else
+            exit(ColorText("[ERROR] Failed to copy encode.src to /server!", ERROR))
+        end if
+    else
+        exit(ColorText("[ERROR] Not found encode.src file!", ERROR))
+    end if
+end function
+
+InstallDecode = function(codePath) // Установщик для decode.src
+    files = codePath.get_files()
+
+    if files.indexOf("decode.src") != null then
+        decode = get_shell.host_computer.File(codePath.path() + "/decode.src")
+        content = decode.get_content().split("\n")
+
+        adapted_decode = ""
+        for line in content
+            if line.indexOf("realPassword = null") != null then
+                password = user_input(ColorText("-> Enter your root password: ", GENERAL))
+                adapted_decode = adapted_decode + line.replace("null", password)
+            else
+                adapted_decode = adapted_decode + line
+            end if
+        end for
+
+        saved = decode.set_content(adapted_decode)
+        if saved == 1 then
+            is_builded = get_shell().launch("/bin/build", decode.path() + " /server")
+            if is_builded == 1 then
+                print(ColorText("[SUCCESS] Builded decode.src into /server", SUCCESS))
+                decode_bin = get_shell.host_computer.File("/server/decode")
+
+                if decode_bin.rename("decode.bin") == "" then
+                    print(ColorText("[SUCCESS] Renamed into decode.bin", SUCCESS))
+                else
+                    exit(ColorText("[ERROR] Failed to rename decode into decode.bin!", ERROR))
+                end if
+            else
+                exit(ColorText("[ERROR] Failed to build decode.src into /server!", ERROR))
+            end if
+        else
+            exit(ColorText("[ERROR] Failed to save new file content!", ERROR))
+        end if
+    else
+        exit(ColorText("[ERROR] Not found decode.src file!", ERROR))
+    end if
+end function
+
+
+usage = [
+    "Usage:",
+    "   ssh-encryption install - manage custom ssh encryption",
+].join("\n")
+
+if params.len() < 1 then
+    exit(ColorText(usage, ERROR))
+end if
+
+print(ColorText("[WARNING] After installation, don't forget to enable encryption in /server/conf/sshd.conf!", WARNING))
+
+operation = params[0]
+if operation == "install" then
+    code_path = user_input(ColorText("-> ", GENERAL))
+
+    codePath = get_shell.host_computer.File(code_path)
+    if codePath != null then
+        print(ColorText("[INFO] Installing custom encode function...", INFO))
+        InstallEncode(codePath)
+
+        print(ColorText("[INFO] Installing custom decode function...", INFO))
+        InstallDecode(codePath)
+
+        print(ColorText("[SUCCESS] It looks like everything was installed successfully", SUCCESS))
+    else
+        exit(ColorText("[ERROR] The specified path does not exist.", ERROR))
+    end if
+else
+    print(ColorText(usage, ERROR))
+end if
