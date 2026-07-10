@@ -1,0 +1,42 @@
+INFO = "#424141"
+ERROR = "#e8594f"
+SUCCESS = "#7ef069"
+
+
+// === Функции, служающие вспомогательными инструментами === 
+
+ColorText = function(text, color) // Позволяет легче окрашивать текст в разные цвета
+    return "<color=" + color + ">" + text + "</color>"
+end function
+
+
+// === Функции, связанные со сборкой исходного кода ===
+
+
+Make = function(sourceFile)
+    if sourceFile != null then
+        print(ColorText("[INFO] Compiling into /bin...", INFO))
+        build_status = get_shell.launch("/bin/build", sourceFile.path() + " /bin")
+
+        if build_status == 1 then
+            print(ColorText("[SUCCESS] Compiled into /bin successfully", SUCCESS))
+        else
+            exit(ColorText("[ERROR] Failed to compile into /bin!", ERROR))
+        end if
+    else
+        exit(ColorText("[ERROR] Not found source file!", ERROR))
+    end if
+end function
+
+
+usage = [
+    "Usage:",
+    "   make [SourceFilePath] - launches build on source file",
+].join("\n")
+
+if params.len() < 1 then
+    exit(ColorText(usage, ERROR))
+end if
+
+sourceFile = get_shell.host_computer.File(params[0])
+Make(sourceFile)
