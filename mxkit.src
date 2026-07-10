@@ -1,10 +1,10 @@
-GetLib = function(lib) // Imports a library with the required name (two methods)
-    lib = include_lib("/lib/" + lib)
+GetLib = function(libName) // Imports a library with the required name (two methods)
+    lib = include_lib("/lib/" + libName)
 
     if not lib then    
-        lib = include_lib(lib)
+        lib = include_lib(libName)
         if not lib then
-            exit("Error: Missing " + lib + " library.")
+            exit("Error: Missing " + libName + " library.")
         else
             return lib
         end if
@@ -62,10 +62,10 @@ ScanMetaLib = function(metaLib, information) // Returns the vulnerabilities foun
                         
                         is_failed = null
                         for line in lineSplit                            
-                            if line.indexOf("* Checking registered users equal to") then
+                            if line.indexOf("* Checking registered users equal to") != null then
                                 num = line[-2:][0]
 
-                                if num[0].val < any_users_active then is_failed = true
+                                if num[0].val < registered_users then is_failed = true
                             end if
                         end for
 
@@ -107,9 +107,10 @@ ScanMetaLib = function(metaLib, information) // Returns the vulnerabilities foun
                 end for
             end if
 
-            return exploits
         end if
     end for
+
+    return exploits
 end function
 
 LookupNetSession = function(netSession)
@@ -128,7 +129,7 @@ end function
 
 UseCorrectFlow = function(flow) // Determines the flow type and uses it
     if typeof(flow) == "string" then // Error string
-        if flow.indexOf("Starting attack... failed!") then
+        if flow.indexOf("Starting attack... failed!") != null then
             print("-> exploit conditions have not been met")
         else
             print("-> error: " + flow)
@@ -227,7 +228,7 @@ else if mode == "remote" then
     print("-> " + metaLib.lib_name + "=v" + metaLib.version)
 
     exploits = ScanMetaLib(metaLib, information)
-    print("-> " + exploits.indexes() + " vulnerable memory areas were found")
+    print("-> " + exploits.indexes().len() + " vulnerable memory areas were found")
 
     for area in exploits.indexes()
         for segment in exploits[area].values()
