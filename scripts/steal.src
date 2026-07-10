@@ -1,0 +1,124 @@
+INFO = "#424141"
+ERROR = "#e8594f"
+SUCCESS = "#7ef069"
+WARNING = "#8c8f2e"
+GENERAL = "#361f31"
+
+
+// === Функции, служающие вспомогательными инструментами ===
+
+
+ImportLibrary = function(currentPath, libraryName) // Импортирует необходимую библиотеку из трех разных мест
+    library = include_lib("/lib/" + libraryName) // Пробуем импортировать из /lib
+
+    if library then
+        return library
+    else
+        library = include_lib(currentPath + "/" + libraryName) // Пробуем импортировать из текущей папки
+        
+        if library then
+            return library
+        else
+            library = include_lib(currentPath + "/Utils/" + libraryName) // Пробуем импортировать из ~/Utils
+
+            if library then
+                return library
+            else
+                exit(ColorText("Unable to import " + libraryName + " library. Not found in: ~/, /lib, ~/Utils.", ERROR))
+            end if
+        end if
+    end if
+end function
+
+ColorText = function(text, color) // Позволяет легче окрашивать текст в разные цвета
+    return "<color=" + color + ">" + text + "</color>"
+end function
+
+
+// === Функции, связанные с воровством ценных данных ===
+
+
+StealData = function(localShell, serviceShell, savePath, currentPath) // Ворует ценные данные с удаленного сервиса
+    if typeof(serviceShell) == "shell" then
+        serviceShell = serviceShell.host_computer()
+        home = serviceShell.File("/home")
+        
+        if home != null then
+            for user in home.get_folders()
+                mail = serviceShell.File(user.path() + "/Config/Mail.txt")
+                bank = serviceShell.File(user.path() + "/Config/Bank.txt")
+                
+                for file in [mail, bank]
+                    if file != null and file.has_permission("r") != 0 then
+                        print(ColorText("[INFO] Stealing " + file.name() + " content... (" + user.name() + ")"))
+
+                        result = serviceShell.scp(user.path() + "/Config/" + file.name(), currentPath, shell, 1)
+                        if typeof(result) == "number" then
+                            copied_file = localShell.File(currentPath + file.name())
+                            save_file = localShell.File(savePath)
+
+                            if copied_file != null and save_file != null then
+                                remote_content = copied_file.get_content().split("\n")
+                                local_content = save_file.get_content().split("\n")
+                                combined_content = remote_content + local_content
+
+                                result = ""
+                                for line in combined_content
+                                    if line.len() > 5 then
+                                        result = result + line
+                                    end if
+                                end for
+
+                                saved = save_file.set_content(result)
+                                if saved == 1 then
+                                    print(ColorText("[SUCCESS] Appended new content to " + save_file.path(), SUCCESS))
+                                else
+                                    exit(ColorText("[ERROR] Unable to save stealed credentials.", ERROR))
+                                end if
+                            else
+                                exit(ColorText("[ERROR] Unable to load files.", ERROR))
+                            end if
+                        else
+                            exit(ColorText("[ERROR] Unable to download file copy.", ERROR))
+                        end if
+                    end if
+                end for
+            end for
+        else
+            exit(ColorText("[ERROR] Not found /home directory.", ERROR))
+        end if
+    else
+        exit(ColorText("[ERROR] Connection error: " + serviceShell, ERROR))
+    end if
+end function
+
+
+usage = [
+    "Usage:",
+    "   steal [Service] [IP] [Port] [SaveFilePath] - steal valuable data with the specified parameters",
+].join("\n")
+
+if params.len < 4 then
+    exit(ColorText(usage, ERROR))
+end if
+
+print(ColorText("[WARNING] Keep in mind that this script leaves traces behind!", WARNING))
+
+service = params[0]
+if service == "ssh" then
+    // ssh [IP] [Port] [SaveFilePath]
+    // params: 0=Service, 1=IP, 2=Port, 3=SaveFilePath
+    user = user_input(ColorText("-> SSH Username? ", GENERAL))
+    password = user_input(ColorText("-> SSH Password? ", GENERAL))
+    ssh = get_shell().connect_service(params[1], params[2].to_int(), user, password, "ssh")
+    StealData(get_shell(), ssh, params[3], current_path())
+else if service == "ftp" then
+    // ftp [IP] [Port] [SaveFilePath]
+    // params: 0=Service, 1=IP, 2=Port, 3=SaveFilePath
+    user = user_input(ColorText("-> FTP Username? ", GENERAL))
+    password = user_input(ColorText("-> FTP Password? ", GENERAL))
+    ftp = get_shell().connect_service(params[1], params[2].to_int(), user, password, "ftp")
+    StealData(get_shell(), ftp, params[3], current_path())
+else
+    exit(ColorText(usage, ERROR))
+end if

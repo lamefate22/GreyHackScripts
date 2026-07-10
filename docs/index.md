@@ -75,4 +75,4 @@ These modular source files are used internally to provide advanced functionality
 Track the ongoing development, upcoming features, and future architecture overhauls.
 
 - [ ] `mxkit`: Implement a local caching layer for discovered library vulnerabilities to optimize execution speed.
-- [ ] `steal`: Develop a dedicated post-exploitation module tailored for automated credential harvesting via active SSH and FTP sessions.
+- [x] `steal`: Develop a dedicated post-exploitation module tailored for automated credential harvesting via active SSH and FTP sessions.
