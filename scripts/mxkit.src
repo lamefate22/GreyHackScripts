@@ -51,7 +51,7 @@ ImportLibrary = function(currentPath, libraryName) // Импортирует н�
             if library then
                 return library
             else
-                exit(ColorText("Unable to import " + libraryName + " library. Not found in: ~/, /lib, ~/Utils.", ERROR))
+                exit(ColorText("[ERROR] Unable to import " + libraryName + " library. Not found in: ~/, /lib, ~/Utils.", ERROR))
             end if
         end if
     end if
@@ -89,6 +89,11 @@ end function
 
 PerformAttack = function(metaLib, information, mode, label) // Позволяет выполнить атаку, учитывая выбранный режим работы
     flow = null
+    extra = user_input(ColorText("-> Overflow extra value? (empty = null) ", GENERAL))
+    
+    if extra.len() == 0 then
+        extra == null
+    end if
 
     if mode == "a" or mode == "auto" then
         print(ColorText("[INFO][" + label + "] Performing ScanMetaLib...", INFO))
@@ -109,14 +114,16 @@ PerformAttack = function(metaLib, information, mode, label) // Позволяе�
 
         print(ColorText("[INFO][" + label + "] Performing ExploitMetaLib...", INFO))
         print(ColorText(actualAddress + " | " + selectedVuln, INFO))
-        flow = ExploitMetaLib(metaLib, actualAddress, selectedVuln)
+
+        flow = ExploitMetaLib(metaLib, actualAddress, selectedVuln, extra)
     else
         memAddr = user_input(ColorText("-> Which unsecure memory address? ", GENERAL))
         vulnerability = user_input(ColorText("-> Which unsecure value? ", GENERAL))
 
         print(ColorText("[INFO][" + label + "] Performing ExploitMetaLib...", INFO))
         print(ColorText(memAddr + " | " + vulnerability, INFO))
-        flow = ExploitMetaLib(metaLib, memAddr, vulnerability)
+
+        flow = ExploitMetaLib(metaLib, actualAddress, selectedVuln, extra)
     end if
 
     print(ColorText("[INFO][" + label + "] Performing UseCorrectFlow...", INFO))
@@ -181,7 +188,7 @@ end function
 
 ScanMetaLib = function(metaLib, information) // Сканирует переданный объект metaLib на уязвимости
     memoryAddresses = meta.scan(metaLib)
-    if memoryAddresses == null then exit(ColorText("Unable to scan library.", ERROR))
+    if memoryAddresses == null then exit(ColorText("[ERROR] Unable to scan library.", ERROR))
 
     exploits = {}
     for memAddress in memoryAddresses
@@ -295,18 +302,13 @@ end function
 
 meta = ImportLibrary(current_path(), "metaxploit.so")
 
-usage = [
-    "Usage:",
-    "   mxkit - launches the tool"
-].join("\n")
-
 mode = CustomInput(ColorText("-> Use auto-scan or manual mode? ", GENERAL), ["a", "m", "auto", "manual"])
 target = CustomInput(ColorText("-> Use attack mode - router, remote, or local? ", GENERAL), ["router", "remote", "local"])
 
 if target == "router" then
     target_ip = user_input(ColorText("-> Router IP? ", GENERAL))
     netSession = GetNetSession(target_ip, null)
-    if netSession == null then exit(ColorText("Returned null netSession.", ERROR))
+    if netSession == null then exit(ColorText("[ERROR] Returned null netSession.", ERROR))
 
     label = target_ip
 
@@ -320,7 +322,7 @@ else if target == "remote" then
     target_ip = user_input(ColorText("-> Remote IP? ", GENERAL))
     target_port = user_input(ColorText("-> Remote Port? ", GENERAL))
     netSession = GetNetSession(target_ip, target_port)
-    if netSession == null then exit(ColorText("Returned null netSession.", ERROR))
+    if netSession == null then exit(ColorText("[ERROR] Returned null netSession.", ERROR))
 
     label = target_ip + ":" + target_port
 
