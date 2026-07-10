@@ -87,7 +87,7 @@ print(ColorText("[WARNING] After installation, don't forget to enable encryption
 
 operation = params[0]
 if operation == "install" then
-    code_path = user_input(ColorText("-> ", GENERAL))
+    code_path = user_input(ColorText("-> Directory path with encode.src/decode.src? ", GENERAL))
 
     codePath = get_shell.host_computer.File(code_path)
     if codePath != null then
