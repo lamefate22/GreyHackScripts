@@ -1,11 +1,11 @@
 <style>
-  #content h1:first-child {
-    display: none !important;
-  }
-
   body {
     background-color: #20202b !important;
     color: #e4e7f2 !important;
+  }
+
+  .markdown-body > h1:first-of-type {
+    display: none !important;
   }
 
   h1 {
@@ -31,7 +31,7 @@
     color: #a6e3a1 !important;
     border: 1px solid #45475a !important;
   }
-  
+
   blockquote {
     color: #bac2de !important;
     border-left: 3px solid #e4e7f2 !important;
@@ -39,7 +39,7 @@
   }
 </style>
 
-# GHS Docs | GreyHackScripts
+# GHS Documentation
 
 Welcome to the official documentation repository. This site provides a comprehensive guide on how to deploy, configure, and utilize the scripts and automated utilities within this project.
 
