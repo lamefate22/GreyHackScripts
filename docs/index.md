@@ -8,6 +8,15 @@
     display: none !important;
   }
 
+  .task-list-item {
+  list-style-type: none !important;
+  }
+
+  .task-list-item-checkbox {
+    margin: 0 0.5em 0.25em -1.3em !important;
+    vertical-align: middle !important;
+  }
+
   h1 {
     text-align: center !important;
     margin-top: 2rem !important;
