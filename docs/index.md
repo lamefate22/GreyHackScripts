@@ -1,29 +1,37 @@
 <style>
+  #content h1:first-child {
+    display: none !important;
+  }
+
   body {
     background-color: #20202b !important;
     color: #e4e7f2 !important;
   }
-  header {
-    display: none !important;
-  }
+
   h1 {
     text-align: center !important;
     margin-top: 2rem !important;
+    border-bottom: none !important;
   }
+
   h1, h2, h3, h4, h5, h6 {
     color: #e4e7f2 !important;
   }
+
   a {
     color: #89b4fa !important;
   }
+
   a:hover {
     color: #b4befe !important;
   }
+
   code, pre {
     background-color: #313244 !important;
     color: #a6e3a1 !important;
     border: 1px solid #45475a !important;
   }
+  
   blockquote {
     color: #bac2de !important;
     border-left: 3px solid #e4e7f2 !important;
@@ -31,7 +39,7 @@
   }
 </style>
 
-# 🛠️ GHS Docs | GreyHackScripts
+# GHS Docs | GreyHackScripts
 
 Welcome to the official documentation repository. This site provides a comprehensive guide on how to deploy, configure, and utilize the scripts and automated utilities within this project.
 
