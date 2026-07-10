@@ -1,6 +1,6 @@
 <style>
   body {
-    background-color: #2a2a2e !important;
+    background-color: #20202b !important;
     color: #e4e7f2 !important;
   }
   h1, h2, h3, h4, h5, h6 {
@@ -30,14 +30,16 @@ Welcome to the official documentation repository. This site provides a comprehen
 
 > 💡 **Tip:** Some modules require that the current system contain a `/lib/Utils` folder with the necessary importable modules. Typically, only modules that run exclusively on your machine have this requirement.
 
-## 🚀 Core Modules
+---
+
+### 🚀 Core Modules
 
 Discover the primary standalone tools built to streamline network operations and security auditing.
 
 - 🖥️ `mxkit` - A powerful, high-performance module designed for fully automated vulnerability scanning and exploitation.
 - 🔓 `qdecipher` - A fast, lightweight decryption utility capable of parsing and decoding encrypted files or standalone raw strings on the fly.
 
-## 📦 Importable Modules
+### 📦 Importable Modules
 
 These modular source files are used internally to provide advanced functionality, abstracting low-level operations.
 
