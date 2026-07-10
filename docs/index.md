@@ -1,10 +1,10 @@
 <style>
   body {
-    background-color: #1e1e2e !important;
-    color: #cdd6f4 !important;
+    background-color: #2a2a2e !important;
+    color: #e4e7f2 !important;
   }
   h1, h2, h3, h4, h5, h6 {
-    color: #f5e0dc !important;
+    color: #e4e7f2 !important;
   }
   a {
     color: #89b4fa !important;
@@ -19,7 +19,7 @@
   }
   blockquote {
     color: #bac2de !important;
-    border-left: 4px solid #f5e0dc !important;
+    border-left: 3px solid #e4e7f2 !important;
     background-color: #252538 !important;
   }
 </style>
@@ -28,7 +28,7 @@
 
 Welcome to the official documentation repository. This site provides a comprehensive guide on how to deploy, configure, and utilize the scripts and automated utilities within this project.
 
----
+> 💡 **Tip:** Some modules require that the current system contain a `/lib/Utils` folder with the necessary importable modules. Typically, only modules that run exclusively on your machine have this requirement.
 
 ## 🚀 Core Modules
 
@@ -44,14 +44,9 @@ These modular source files are used internally to provide advanced functionality
 - 🛠️ `utils/import.src` - A custom dependency manager that introduces a robust, centralized function for importing dynamic shared libraries.
 - 🔤 `utils/strings.src` - An advanced string manipulation library providing high-level helper functions for text parsing and formatting.
 
----
-
 ## 📌 Development Roadmap
 
 Track the ongoing development, upcoming features, and future architecture overhauls.
 
 - [ ] `mxkit`: Implement a local caching layer for discovered library vulnerabilities to optimize execution speed.
 - [ ] `steal`: Develop a dedicated post-exploitation module tailored for automated credential harvesting via active SSH and FTP sessions.
-
----
-> 💡 **Tip:** Some modules require that the current system contain a `/lib/Utils` folder with the necessary importable modules. Typically, only modules that run exclusively on your machine have this requirement.
