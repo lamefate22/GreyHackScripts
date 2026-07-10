@@ -103,13 +103,13 @@ PerformAttack = function(metaLib, information, mode, label) // Позволяе�
         CustomPrint(exploits.indexes())
 
         memIdx = user_input(ColorText("-> Which unsecure memory address? (index) ", GENERAL)).to_int()
-        if memIdx >= exploits.indexes().len() then exit("Index out of list.")
+        if memIdx >= exploits.indexes().len() then exit(ColorText("[ERROR] Index out of list!", ERROR))
         actualAddress = exploits.indexes()[memIdx]
 
         CustomPrint(exploits[actualAddress])
 
         vulnIdx = user_input(ColorText("-> Which unsecure value? (index) ", GENERAL)).to_int()
-        if vulnIdx >= exploits[actualAddress].len() then exit("Index out of list.")
+        if vulnIdx >= exploits[actualAddress].len() then exit(ColorText("[ERROR] Index out of list!", ERROR))
         selectedVuln = exploits[actualAddress][vulnIdx]
 
         print(ColorText("[INFO][" + label + "] Performing ExploitMetaLib...", INFO))
@@ -245,7 +245,7 @@ UseCorrectFlow = function(flow) // Определяет тип объекта fl
 
         passwd = flow.File("/etc/passwd")
         if passwd == null then
-            print(ColorText("[ERROR] File /etc/passwd not found", ERROR))
+            exit(ColorText("[ERROR] File /etc/passwd not found!", ERROR))
         else if passwd.has_permission("r") != 0 then
             root = passwd.get_content().split("\n")[0]
             print(ColorText("[SUCCESS] Root password retrieved: " + root, SUCCESS))
@@ -257,7 +257,7 @@ UseCorrectFlow = function(flow) // Определяет тип объекта fl
             if typeof(is_spoofed) == "number" then
                 print(ColorText("[SUCCESS] Root password changed: " + password, SUCCESS))
             else
-                print(ColorText("[ERROR] Spoofing error: " + is_spoofed, ERROR))
+                exit(ColorText("[ERROR] Spoofing error: " + is_spoofed, ERROR))
             end if
         end if
     else if typeof(flow) == "file" then
