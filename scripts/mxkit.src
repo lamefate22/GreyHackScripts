@@ -1,7 +1,7 @@
 INFO = "#424141"
 ERROR = "#e8594f"
 SUCCESS = "#7ef069"
-GENERAL = "#361f31"
+GENERAL = "#663a5c"
 
 FILE = "#abb2bf"
 FOLDER = "#8fbcbb"
