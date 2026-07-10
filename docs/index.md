@@ -3,6 +3,13 @@
     background-color: #20202b !important;
     color: #e4e7f2 !important;
   }
+  header {
+    display: none !important;
+  }
+  h1 {
+    text-align: center !important;
+    margin-top: 2rem !important;
+  }
   h1, h2, h3, h4, h5, h6 {
     color: #e4e7f2 !important;
   }
