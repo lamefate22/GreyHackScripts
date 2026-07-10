@@ -1,0 +1,33 @@
+ExtractMatchingLine = function(text, phrase) // Возвращает искомую линию из текста или null
+    lines = text.split("\n")
+
+    for line in lines
+        if line.indexOf(phrase) != null then return line
+    end for
+
+    return null
+end function
+
+ExtractFirstNumber = function(line) // Возвращает первое найденное число из строки или null
+    numStr = ""
+    started = false
+
+    for i in range(0, line.len - 1)
+        ch = line[i]
+        isDigit = (ch >= "0" and ch <= "9")
+
+        if isDigit then
+            numStr = numStr + ch
+            started = true
+        else if started then
+            break
+        end if
+    end for
+
+    if numStr == "" then
+        return null
+    else
+        return numStr.val
+    end if
+end function
+

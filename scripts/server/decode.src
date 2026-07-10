@@ -45,7 +45,7 @@ Decode = function(receivedHash)
     end function
 
     GetRealPassword = function()
-        computer = get_shell.host_computer
+        computer = get_shell.host_computer // NOTE: Runtime Error: get_shell: unable to use this method in encryption configuration [/ line 48]
         passwd = computer.File("/etc/passwd")
 
         if passwd == null then return null
