@@ -1,33 +1,20 @@
-GetLib = function(libName) // Imports a library with the required name (two methods)
-    lib = include_lib("/lib/" + libName)
+import_code("/lib/Utils/import.src")
 
-    if not lib then    
-        lib = include_lib(libName)
-        if not lib then
-            exit("Error: Missing " + libName + " library.")
-        else
-            return lib
-        end if
-    else
-        return lib
-    end if
-end function
+crypto = ImportLibrary("crypto.so")
 
-crypto = GetLib("crypto.so")
-
-ValidateFile = function(file) // Checks the file object for errors
+ValidateFile = function(file) // Проверяет объект файла на различные ошибки
     if not file then exit("Error: File not found.")
     if file.is_binary then exit("Error: Can't read. Binary file")
     if file.get_content.len == 0 then exit("Error: No users found.")
     if not file.has_permission("r") then exit("Error: Can't read file. Permission denied.")
 end function
 
-DecipherPassword = function(encryptedPassword) // Deciphers the password
+DecipherPassword = function(encryptedPassword) // Расшифровывает пароль
     decryptedPassword = crypto.decipher(encryptedPassword)
     return decryptedPassword
 end function
 
-DecipherFile = function(file) // Deciphers a file containing encrypted passwords line by line
+DecipherFile = function(file) // Расшифровывает весь файл построчно
     content = file.get_content()
     lines = content.split("\n")
     result = []
