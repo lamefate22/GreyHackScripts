@@ -1,10 +1,10 @@
-GetLib = function(lib) // Imports a library with the required name in two ways
-    lib = include_lib("/lib/" + lib)
+GetLib = function(libName) // Imports a library with the required name (two methods)
+    lib = include_lib("/lib/" + libName)
 
     if not lib then    
-        lib = include_lib(lib)
+        lib = include_lib(libName)
         if not lib then
-            exit("Error: Missing " + lib + " library.")
+            exit("Error: Missing " + libName + " library.")
         else
             return lib
         end if
