@@ -1,6 +1,6 @@
 import_code("/lib/Utils/import.src")
 
-crypto = ImportLibrary("crypto.so")
+crypto = ImportLibrary(current_path(), "crypto.so")
 
 ValidateFile = function(file) // Проверяет объект файла на различные ошибки
     if not file then exit("Error: File not found.")
