@@ -96,7 +96,7 @@ end function
 usage = [
     "Usage:",
     "   steal ssh [IP] [Port] [SaveFilePath] - steal valuable data from ssh",
-    "   steal ftp [IP] [Port] [SaveFilePath] - steal valuable data from ftp"
+    "   steal ftp [IP] [Port] [SaveFilePath] - steal valuable data from ftp",
 ].join("\n")
 
 if params.len < 4 then
