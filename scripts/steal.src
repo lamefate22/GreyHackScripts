@@ -40,22 +40,23 @@ end function
 
 StealData = function(localShell, serviceShell, savePath, currentPath) // Ворует ценные данные с удаленного сервиса
     if typeof(serviceShell) == "shell" then
-        serviceShell = serviceShell.host_computer()
-        home = serviceShell.File("/home")
+        originalServiceShell = serviceShell
+        serviceComputer = serviceShell.host_computer()
+        home = serviceComputer.File("/home")
         
         if home != null then
             for user in home.get_folders()
-                mail = serviceShell.File(user.path() + "/Config/Mail.txt")
-                bank = serviceShell.File(user.path() + "/Config/Bank.txt")
+                mail = serviceComputer.File(user.path() + "/Config/Mail.txt")
+                bank = serviceComputer.File(user.path() + "/Config/Bank.txt")
                 
                 for file in [mail, bank]
                     if file != null and file.has_permission("r") != 0 then
-                        print(ColorText("[INFO] Stealing " + file.name() + " content... (" + user.name() + ")"))
+                        print(ColorText("[INFO] Stealing " + file.name() + " content... (" + user.name() + ")", INFO))
 
-                        result = serviceShell.scp(user.path() + "/Config/" + file.name(), currentPath, shell, 1)
+                        result = originalServiceShell.scp(user.path() + "/Config/" + file.name(), currentPath, localShell)
                         if typeof(result) == "number" then
-                            copied_file = localShell.File(currentPath + file.name())
-                            save_file = localShell.File(savePath)
+                            copied_file = localShell.host_computer.File(currentPath + file.name())
+                            save_file = localShell.host_computer.File(savePath)
 
                             if copied_file != null and save_file != null then
                                 remote_content = copied_file.get_content().split("\n")
